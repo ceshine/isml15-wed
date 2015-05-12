@@ -1,6 +1,7 @@
 """The metrics module implements functions assessing prediction error for specific purposes."""
 
 import numpy as np
+import pandas as pd
 
 
 def trapz(x, y):
@@ -9,25 +10,28 @@ def trapz(x, y):
     Assume x and y are in the range [0,1]
     """
     assert len(x) == len(y), 'x and y need to be of same length'
-    x = np.concatenate([x, np.array([0.0, 1.0])])
-    y = np.concatenate([y, np.array([0.0, 1.0])])
-    sort_idx = np.argsort(x)
-    sx = x[sort_idx]
-    sy = y[sort_idx]
+    df = pd.DataFrame({'x': np.concatenate([x, np.array([0.0, 1.0])]),
+                       'y': np.concatenate([y, np.array([0.0, 1.0])])})
+    df = df.sort(['x', 'y'])
     area = 0.0
-    for ix in range(len(x) - 1):
-        area += 0.5 * (sx[ix + 1] - sx[ix]) * (sy[ix + 1] + sy[ix])
+    for ix in range(len(df) - 1):
+        area += (0.5 *
+                 (df['x'].iloc[ix + 1] - df['x'].iloc[ix]) *
+                 (df['y'].iloc[ix + 1] + df['y'].iloc[ix]))
     return area
 
 
 def auc(y_true, y_score):
     y_true, y_score = np.array(y_true), np.array(y_score)
     if not np.all(np.in1d(y_true, [0, 1])):
-        raise ValueError('y_true should only contain 0 and 1!')
-    tps, fps = np.array([]), np.array([])
-    n = len(y_true)
-    for threshold in np.sort(y_score)[:-1]:
-        tp = np.sum(np.absolute((y_score <= threshold) - y_score))
-        np.append(tps, tp / n)
-        np.append(fps, (n - tp) / n)
+        raise ValueError('y_true can only contain 0 and 1!')
+    n_pos = np.sum(y_true)
+    n_neg = len(y_true) - n_pos
+    fps, tps = np.array([]), np.array([])
+    for threshold in np.sort(y_score):
+        pred = (y_score > threshold)
+        fp = np.sum(np.logical_and(pred == 1, y_true == 0))
+        tp = np.sum(pred) - fp
+        fps = np.append(fps, fp / n_neg)
+        tps = np.append(tps, tp / n_pos)
     return trapz(fps, tps)
