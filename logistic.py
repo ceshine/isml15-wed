@@ -20,14 +20,14 @@ class LogisticRegression():
         t = y
         y = self._sigmoid(np.dot(w, X.transpose()))
         diff = y - t
-        return np.apply_along_axis(sum, 0,
+        return np.apply_along_axis(np.mean, 0,
                                    np.apply_along_axis(
                                        lambda a: np.multiply(diff, a), 0, X))
 
-    def train(self, X, y):
+    def train(self, X, y, maxiter=100):
         w0 = np.random.rand(X.shape[1])
         xopt = opt.fmin_bfgs(self._cost, w0,
-                             self._gradient, args=(X, y), maxiter=100)
+                             self._gradient, args=(X, y), maxiter=maxiter)
         self.w = xopt
 
     def predict(self, X, prob=False):
