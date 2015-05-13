@@ -34,7 +34,7 @@ class LogisticRegression():
         if getattr(self, 'w', None) is None:
             raise RuntimeError("Train before predicting.")
         threshold = 0.5
-        y = np.dot(self.w, X.transpose())
+        y = self._sigmoid(np.dot(self.w, X.transpose()))
         return (y > 0.5) * 1
 
 
