@@ -22,13 +22,20 @@ def trapz(x, y):
 
 
 def auc(y_true, y_score):
+    """
+    Returns Area Under (ROC) Curve
+    >>> y_true = [0., 0., 1., 1.]
+    >>> y_score = [-20., 0.2, 0.1, 0.9]
+    >>> auc(y_true, y_score)
+    0.75
+    """
     y_true, y_score = np.array(y_true), np.array(y_score)
     if not np.all(np.in1d(y_true, [0, 1])):
         raise ValueError('y_true can only contain 0 and 1!')
     n_pos = np.sum(y_true)
     n_neg = len(y_true) - n_pos
     fps, tps = np.array([]), np.array([])
-    for threshold in np.sort(y_score):
+    for threshold in np.sort(y_score)[:-1]:
         pred = (y_score > threshold)
         fp = np.sum(np.logical_and(pred == 1, y_true == 0))
         tp = np.sum(pred) - fp
