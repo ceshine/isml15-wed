@@ -14,7 +14,7 @@ class LogisticRegression():
         """ Return the cost give the parameter w and data"""
         t = y
         y = self._sigmoid(np.dot(w, X.transpose()))
-        return np.sum(np.multiply(t, np.log(y)) + np.multiply(1 - t, np.log(1 - y))) * -1.0
+        return np.mean(np.multiply(t, np.log(y)) + np.multiply(1 - t, np.log(1 - y))) * -1.0
 
     def _gradient(self, w, X, y):
         t = y
@@ -53,7 +53,7 @@ def test_logistic_regression_train():
         model.w, data.drop('Y', 1), data["Y"]) - 361.722692813 < 1e-5
 
     def cost(y, pred):
-        return np.sum(np.multiply(y, np.log(pred)) + np.multiply(1 - y, np.log(1 - pred))) * -1.0
+        return np.mean(np.multiply(y, np.log(pred)) + np.multiply(1 - y, np.log(1 - pred))) * -1.0
     assert cost(data["Y"], model.predict(
         data.drop("Y", 1).values, prob=True)) - 361.722692813 < 1.e-5
 
