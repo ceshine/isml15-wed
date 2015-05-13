@@ -30,11 +30,13 @@ class LogisticRegression():
                              self._gradient, args=(X, y), maxiter=100)
         self.w = xopt
 
-    def predict(self, X):
+    def predict(self, X, prob=False):
         if getattr(self, 'w', None) is None:
             raise RuntimeError("Train before predicting.")
         threshold = 0.5
         y = self._sigmoid(np.dot(self.w, X.transpose()))
+        if prob:
+            return y
         return (y > 0.5) * 1
 
 
@@ -49,6 +51,11 @@ def test_logistic_regression_train():
     model.train(data.drop("Y", 1).values, data["Y"])
     assert model._cost(
         model.w, data.drop('Y', 1), data["Y"]) - 361.722692813 < 1e-5
+
+    def cost(y, pred):
+        return np.sum(np.multiply(y, np.log(pred)) + np.multiply(1 - y, np.log(1 - pred))) * -1.0
+    assert cost(data["Y"], model.predict(
+        data.drop("Y", 1).values, prob=True)) - 361.722692813 < 1.e-5
 
 if __name__ == '__main__':
     test_logistic_regression_train()
